@@ -25,7 +25,6 @@ A feature-rich Flutter mobile application for discovering and streaming movies a
 ### 🔍 Search Functionality
 
 - **Universal Search**: Search across both movies and TV series
-- **Real-time Results**: Instant search results as you type
 - **Cross-platform**: Search covers all available content
 
   ![Dart](./images/search_1.png)
