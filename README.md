@@ -1,16 +1,56 @@
-# my_app
+# 🎬 FlixStream - Movies & TV Series App
 
-A new Flutter project.
+A feature-rich Flutter mobile application for discovering and streaming movies and TV series. The app provides comprehensive entertainment information with seamless streaming capabilities.
 
-## Getting Started
+![Flutter](https://img.shields.io/badge/Flutter-3.19+-blue.svg)
+![Dart](https://img.shields.io/badge/Dart-3.0+-blue.svg)
 
-This project is a starting point for a Flutter application.
+## 📱 Features
 
-A few resources to get you started if this is your first Flutter project:
+### 🏠 Home Page
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Curated Sections**: Now Playing, Top Rated, Popular, Trending.
+- **Show More**: Expandable sections with "Show More" functionality
+- **Horizontal Scrolling**: Smooth navigation through content sections
+  ![Dart](./images/home.png)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 🎭 Content Pages
+
+- **Movies Page**: Dedicated movies listing with pagination
+- **TV Series Page**: Dedicated TV series listing with pagination
+- **Pagination**: Next/Previous page navigation for both movies and TV series
+  ![Dart](./images/movies.png)
+  ![Dart](./images/tv.png)
+
+### 🔍 Search Functionality
+
+- **Universal Search**: Search across both movies and TV series
+- **Real-time Results**: Instant search results as you type
+- **Cross-platform**: Search covers all available content
+
+  ![Dart](./images/search_1.png)
+  ![Dart](./images/search_2.png)
+
+### 📺 Details & Streaming
+
+- **Detailed Views**: Comprehensive movie/TV series information
+- **Backdrop Gallery**: High-quality backdrop images
+- **Integrated Streaming**: WebView-powered video player using external APIs
+- **Content Recommendations**: Similar titles and recommendations sections
+  ![Dart](./images/details_1.png)
+  ![Dart](./images/details_2.png)
+
+## Stack
+
+### Core Dependencies
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  webview_flutter: ^4.4.2
+  webview_flutter_android: ^3.3.0
+  webview_flutter_wkwebview: ^3.3.0
+  flutter_inappwebview: ^6.0.0
+```
