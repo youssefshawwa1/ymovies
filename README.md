@@ -1,4 +1,4 @@
-# 🎬 FlixStream - Movies & TV Series App
+# YMOVIES - Movies & TV Series App
 
 A feature-rich Flutter mobile application for discovering and streaming movies and TV series. The app provides comprehensive entertainment information with seamless streaming capabilities.
 
