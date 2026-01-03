@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './Home.dart';
 import "./Sections.dart";
 import "apiLinks.dart";
 import "SearchPage.dart";
+import './ProfilePage.dart';
+import 'WatchlistProvider.dart';
+import "LovedProvider.dart";
+import "AuthProvider.dart";
 
 class MainApp extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -14,34 +19,58 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   int _currentIndex = 0;
   bool _isSearching = false;
-  final List<Widget> _pages = [
-    Home(),
-    GridSection(
-      key: ValueKey('movies'),
-      url: links["allMovies"]["url"],
-      type: "movie",
-      title: links["allMovies"]["title"],
-    ),
-    GridSection(
-      key: ValueKey('tvs'),
-      url: links["allTvs"]["url"],
-      type: "tv",
-      title: links["allTvs"]["title"],
-    ),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      final uid = widget.userData['userId'];
+      if (uid != null) {
+        Provider.of<WatchlistProvider>(
+          context,
+          listen: false,
+        ).fetchWatchlist(uid);
+      }
+      if (uid != null) {
+        Provider.of<LovedProvider>(context, listen: false).fetchLoved(uid);
+      }
+    });
+
+    _pages = [
+      Home(),
+      GridSection(
+        key: const ValueKey('movies'),
+        url: links["allMovies"]["url"],
+        type: "movie",
+        title: links["allMovies"]["title"],
+      ),
+      GridSection(
+        key: const ValueKey('tvs'),
+        url: links["allTvs"]["url"],
+        type: "tv",
+        title: links["allTvs"]["title"],
+      ),
+      ProfilePage(),
+    ];
+  }
 
   Widget _buildNormalBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text("YMOVIES", style: TextStyle(color: Colors.red)),
+        const Text(
+          "YMOVIES",
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        ),
         IconButton(
           onPressed: () {
             setState(() {
               _isSearching = true;
             });
           },
-          icon: Icon(Icons.search, color: Colors.white),
+          icon: const Icon(Icons.search, color: Colors.white),
         ),
       ],
     );
@@ -56,14 +85,14 @@ class _MainAppState extends State<MainApp> {
               _isSearching = false;
             });
           },
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
         Expanded(
           child: TextField(
             autofocus: true,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
             cursorColor: Colors.white,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Search movies and TV shows...',
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
@@ -76,7 +105,6 @@ class _MainAppState extends State<MainApp> {
                     builder: (context) => SearchPage(searchQuery: query),
                   ),
                 );
-                // Optional: Close the search bar after navigation
                 setState(() {
                   _isSearching = false;
                 });
@@ -93,12 +121,14 @@ class _MainAppState extends State<MainApp> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
+        elevation: 0,
         title: _isSearching ? _buildSearchBar() : _buildNormalBar(),
-        actions: [
-          // Optional: Add filter or other actions if needed
-        ],
       ),
-      body: _pages[_currentIndex],
+      body: IndexedStack(
+        // 4. Tip: Use IndexedStack to keep scroll positions when switching tabs
+        index: _currentIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -106,51 +136,33 @@ class _MainAppState extends State<MainApp> {
             _currentIndex = index;
           });
         },
-        type: BottomNavigationBarType.shifting,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.black,
         selectedItemColor: Colors.redAccent,
         unselectedItemColor: Colors.grey,
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
         items: const [
           BottomNavigationBarItem(
-            backgroundColor: Colors.black,
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home_filled),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            backgroundColor: Colors.black,
-            icon: Icon(Icons.movie_creation),
+            icon: Icon(Icons.movie_creation_outlined),
             activeIcon: Icon(Icons.movie_creation_rounded),
             label: 'Movies',
           ),
           BottomNavigationBarItem(
-            backgroundColor: Colors.black,
             icon: Icon(Icons.live_tv_outlined),
             activeIcon: Icon(Icons.live_tv),
             label: 'Series',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
-      ),
-    );
-  }
-}
-
-// Placeholder for pages that don't exist yet
-class PlaceholderWidget extends StatelessWidget {
-  final String title;
-
-  const PlaceholderWidget({Key? key, required this.title}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(
-          '$title\n\nComing Soon!',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
-        ),
       ),
     );
   }

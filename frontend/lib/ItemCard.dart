@@ -3,9 +3,21 @@ import "CardItem.dart";
 
 class ItemCard extends StatelessWidget {
   final VoidCallback onTap;
+  final VoidCallback onWatchlistToggle;
+  final VoidCallback onLovedToggle;
   final CardItem item;
-  const ItemCard({Key? key, required this.item, required this.onTap})
-    : super(key: key);
+  final bool isSaved;
+  final bool isLoved;
+
+  const ItemCard({
+    Key? key,
+    required this.item,
+    required this.onTap,
+    required this.onWatchlistToggle,
+    required this.onLovedToggle,
+    this.isSaved = false,
+    this.isLoved = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,20 +26,20 @@ class ItemCard extends StatelessWidget {
       child: Container(
         width: 150,
         height: 220,
-        margin: EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.white.withOpacity(0.1),
-              blurRadius: 8,
-              offset: Offset(0, 8),
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: Stack(
           children: [
-            // Background Image
+            // 1. Background Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
@@ -35,16 +47,13 @@ class ItemCard extends StatelessWidget {
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
-                // loadingBuilder: CircularProgressIndicator(),
-                errorBuilder: (context, error, stackTrace) {
-                  return Center(
-                    child: Icon(Icons.broken_image, color: Colors.black),
-                  );
-                },
+                errorBuilder: (context, error, stackTrace) => const Center(
+                  child: Icon(Icons.broken_image, color: Colors.white54),
+                ),
               ),
             ),
 
-            // Gradient Overlay
+            // 2. Gradient Overlay (Darker at top and bottom for visibility)
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
@@ -52,86 +61,86 @@ class ItemCard extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.1),
                     Colors.black.withOpacity(0.7),
+                    Colors.transparent,
+                    Colors.transparent,
                     Colors.black.withOpacity(0.9),
                   ],
+                  stops: const [0.0, 0.2, 0.5, 1.0],
                 ),
               ),
             ),
 
-            // Content
+            // 3. TOP LEFT: Loved Toggle
+            Positioned(
+              top: 2,
+              left: 2,
+              child: IconButton(
+                onPressed: onLovedToggle,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(8),
+                icon: Icon(
+                  isLoved ? Icons.favorite : Icons.favorite_border,
+                  color: isLoved ? Colors.red : Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+
+            // 4. TOP RIGHT: Watchlist Toggle
+            Positioned(
+              top: 2,
+              right: 2,
+              child: IconButton(
+                onPressed: onWatchlistToggle,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(8),
+                icon: Icon(
+                  isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
+                  color: isSaved ? Colors.green : Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+
+            // 5. BOTTOM CONTENT
             Padding(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Rating
+                  // Metadata Row: Rating and Type Badge
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 16),
-                      SizedBox(width: 4),
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const SizedBox(width: 4),
                       Text(
                         item.rating!.toStringAsFixed(1),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const Spacer(),
+                      // NEW TYPE BADGE LOCATION
+                      _buildTypeBadge(),
                     ],
                   ),
-                  SizedBox(height: 8),
-                  // Title
+                  const SizedBox(height: 6),
                   Text(
                     item.title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 10,
+                      fontSize: 11,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
-
-                  // Year and Type Info
+                  const SizedBox(height: 4),
                   _buildBottomInfo(),
-                ],
-              ),
-            ),
-
-            // Top Badges
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Column(
-                children: [
-                  // Content Type Badge
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: item.color,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(item.icon, color: Colors.white, size: 12),
-                        SizedBox(width: 2),
-                        Text(
-                          item.typeDisplayName,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -141,41 +150,33 @@ class ItemCard extends StatelessWidget {
     );
   }
 
-  // Helper methods for content type
+  // Small refined Badge for the bottom metadata row
+  Widget _buildTypeBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: item.color.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        item.typeDisplayName.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 8,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
 
   Widget _buildBottomInfo() {
-    if (item.mediaType == "tv" && item.seasons != null) {
-      // TV Series with seasons
-      return Row(
-        children: [
-          Text(
-            item.releaseYear.toString(),
-            style: TextStyle(color: Colors.grey[300], fontSize: 12),
-          ),
-          SizedBox(width: 8),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${item.seasons} S',
-              style: TextStyle(
-                color: Colors.blue[200],
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      // Movie or TV series without seasons info
-      return Text(
-        item.releaseYear.toString(),
-        style: TextStyle(color: Colors.grey[300], fontSize: 10),
-      );
-    }
+    bool isTv = item.mediaType == "tv" && item.seasons != null;
+    return Text(
+      isTv
+          ? "${item.releaseYear} • ${item.seasons} Seasons"
+          : "${item.releaseYear}",
+      style: TextStyle(color: Colors.grey[400], fontSize: 10),
+    );
   }
 }

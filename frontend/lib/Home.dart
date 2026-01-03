@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import "Sections.dart";
-
+import "AuthProvider.dart";
 import "./Helper.dart";
-import "./apiLinks.dart";
 import "./CardItem.dart";
+import "apiLinks.dart";
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -28,6 +29,7 @@ class _HomeState extends State<Home> {
   };
   bool isloading = true;
   String error = '';
+
   @override
   void initState() {
     super.initState();
@@ -84,49 +86,49 @@ class _HomeState extends State<Home> {
         child: Column(
           children: [
             HorizontalSection(
-              title: apiLinks["movie"]["now_playing"]["title"],
+              title: apiLinks["movie"]["now_playing"]["title"].toString(),
               items: _d["movie"]["now_playing"],
               type: 'movie',
               kind: "now_playing",
             ),
             HorizontalSection(
-              title: apiLinks["movie"]["trending"]["title"],
+              title: apiLinks["movie"]["trending"]["title"].toString(),
               items: _d["movie"]["trending"],
               type: 'movie',
               kind: "trending",
             ),
             HorizontalSection(
-              title: apiLinks["movie"]["popular"]["title"],
+              title: apiLinks["movie"]["popular"]["title"].toString(),
               items: _d["movie"]["popular"],
               type: 'movie',
               kind: "popular",
             ),
             HorizontalSection(
-              title: apiLinks["movie"]["top_rated"]["title"],
+              title: apiLinks["movie"]["top_rated"]["title"].toString(),
               items: _d["movie"]["top_rated"],
               type: 'movie',
               kind: "top_rated",
             ),
             HorizontalSection(
-              title: apiLinks["tv"]["airing_today"]["title"],
+              title: apiLinks["tv"]["airing_today"]["title"].toString(),
               items: _d["tv"]["airing_today"],
               type: 'tv',
               kind: "airing_today",
             ),
             HorizontalSection(
-              title: apiLinks["tv"]["trending"]["title"],
+              title: apiLinks["tv"]["trending"]["title"].toString(),
               items: _d["tv"]["trending"],
               type: 'tv',
               kind: "trending",
             ),
             HorizontalSection(
-              title: apiLinks["tv"]["popular"]["title"],
+              title: apiLinks["tv"]["popular"]["title"].toString(),
               items: _d["tv"]["popular"],
               type: 'tv',
               kind: "popular",
             ),
             HorizontalSection(
-              title: apiLinks["tv"]["top_rated"]["title"],
+              title: apiLinks["tv"]["top_rated"]["title"].toString(),
               items: _d["tv"]["top_rated"],
               type: 'tv',
               kind: "top_rated",

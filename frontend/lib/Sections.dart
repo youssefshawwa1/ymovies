@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import "ItemCard.dart";
 import "./CardItem.dart";
-import "./apiLinks.dart";
 import 'Helper.dart';
 import "./ItemDetailsPage.dart";
 import "./apiKey/apiKey.dart";
+import "./apiLinks.dart";
+import 'package:provider/provider.dart';
+import 'WatchlistProvider.dart';
+import "LovedProvider.dart";
 
 class HorizontalSection extends StatelessWidget {
   final String title;
@@ -77,15 +80,35 @@ class HorizontalSection extends StatelessWidget {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index] as CardItem;
-              return ItemCard(
-                item: item,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ItemDetailsPage(id: item.id, type: item.mediaType),
-                    ),
+              return Consumer2<WatchlistProvider, LovedProvider>(
+                builder: (context, watchlist, loved, child) {
+                  // 1. Get status from both providers
+                  bool isBookmarked = watchlist.isSaved(item.id);
+                  // Assuming your LovedProvider has a similar method 'isLoved'
+                  bool isLoved = loved.isLoved(item.id);
+
+                  return ItemCard(
+                    item: item,
+                    isSaved: isBookmarked,
+                    isLoved: isLoved, // Pass the loved status
+                    onWatchlistToggle: () {
+                      watchlist.toggleWatchlistRemote(item);
+                    },
+                    onLovedToggle: () {
+                      // 2. Call the loved toggle method
+                      loved.toggleLovedRemote(item);
+                    },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ItemDetailsPage(
+                            id: item.id,
+                            type: item.mediaType,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               );
@@ -101,11 +124,13 @@ class GridSection extends StatefulWidget {
   final String url;
   final String type;
   final String title;
+  final List<CardItem>? items;
   const GridSection({
     super.key,
     required this.url,
     required this.type,
     required this.title,
+    this.items,
   });
   @override
   State<GridSection> createState() => _GridSectionState();
@@ -120,7 +145,14 @@ class _GridSectionState extends State<GridSection> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    if (widget.items != null) {
+      // 1. Use the passed data
+      _d = widget.items!;
+      isloading = false;
+    } else {
+      // 3. Only fetch if no data was passed
+      _fetchData();
+    }
   }
 
   Future<void> _fetchData({int pageNumber = 1}) async {
@@ -172,15 +204,35 @@ class _GridSectionState extends State<GridSection> {
               padding: EdgeInsets.all(16.0),
               childAspectRatio: 0.7,
               children: _d.map((item) {
-                return ItemCard(
-                  item: item,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ItemDetailsPage(id: item.id, type: item.mediaType),
-                      ),
+                return Consumer2<WatchlistProvider, LovedProvider>(
+                  builder: (context, watchlist, loved, child) {
+                    // 1. Get status from both providers
+                    bool isBookmarked = watchlist.isSaved(item.id);
+                    // Assuming your LovedProvider has a similar method 'isLoved'
+                    bool isLoved = loved.isLoved(item.id);
+
+                    return ItemCard(
+                      item: item,
+                      isSaved: isBookmarked,
+                      isLoved: isLoved, // Pass the loved status
+                      onWatchlistToggle: () {
+                        watchlist.toggleWatchlistRemote(item);
+                      },
+                      onLovedToggle: () {
+                        // 2. Call the loved toggle method
+                        loved.toggleLovedRemote(item);
+                      },
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ItemDetailsPage(
+                              id: item.id,
+                              type: item.mediaType,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 );

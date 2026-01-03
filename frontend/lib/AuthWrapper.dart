@@ -18,7 +18,6 @@ class AuthWrapper extends StatelessWidget {
     } else {
       return LoginPage(
         onAuthComplete: (userData, isSignUp) {
-          // 2. Simply pass the map we got from the API to the provider
           auth.login(userData);
         },
       );

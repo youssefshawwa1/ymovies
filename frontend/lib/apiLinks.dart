@@ -1,16 +1,9 @@
 import './apiKey/apiKey.dart';
-// https://image.tmdb.org/t/p/original/backdrop path
-//sizes original, w1280, w780, w300
 
-//search : https://api.themoviedb.org/3/search/multi
-
-//Recommendation: for movies: https://api.themoviedb.org/3/movie/{movie_id}/recommendations
-//similar for movies: https://api.themoviedb.org/3/movie/{movie_id}/similar
-//movie details: https://api.themoviedb.org/3/movie/{movie_id}
-
-//recomendation for tvs: https://api.themoviedb.org/3/tv/{series_id}/recommendations
-//similar for tvs: https://api.themoviedb.org/3/tv/{series_id}/similar
-//tv details: https://api.themoviedb.org/3/tv/{series_id}
+String apiLink = "http://10.0.2.2/ymovies/api";
+String backDrop = "https://image.tmdb.org/t/p/w1280";
+String posterLink = "https://image.tmdb.org/t/p/w500";
+String embedLink = "https://vidsrc-embed.ru/embed";
 
 Map<String, dynamic> links = {
   "allMovies": {

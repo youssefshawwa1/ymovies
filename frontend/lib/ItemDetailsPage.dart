@@ -1,29 +1,67 @@
 import 'package:flutter/material.dart';
 import './apiKey/apiKey.dart';
 import "./Helper.dart";
-import 'apiLinks.dart';
 import "VideoPlayer.dart";
 import './Sections.dart';
 import "./CardItem.dart";
+import 'package:provider/provider.dart';
+import 'WatchlistProvider.dart';
+import 'LovedProvider.dart';
+import 'AuthProvider.dart';
+import "global.dart";
+import 'dart:convert';
+import "apiLinks.dart";
 
 class ItemDetailsPage extends StatefulWidget {
   final int id;
   final String type;
   const ItemDetailsPage({super.key, required this.id, required this.type});
+
   @override
   State<ItemDetailsPage> createState() => _ItemDetailsPageState();
 }
 
-class _ItemDetailsPageState extends State<ItemDetailsPage> {
+class _ItemDetailsPageState extends State<ItemDetailsPage> with RouteAware {
   Map<String, dynamic> _d = {};
   List<CardItem> _s = [];
   List<CardItem> _r = [];
   bool isloading = true;
   String error = '';
+  bool _isPageVisible = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to the route observer
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this); // Clean up
+    super.dispose();
+  }
+
+  // Called when a new route is pushed on top of this one
+  @override
+  void didPushNext() {
+    setState(() {
+      _isPageVisible = false;
+    });
+  }
+
+  // Called when the top route is popped and this one becomes visible again
+  @override
+  void didPopNext() {
+    setState(() {
+      _isPageVisible = true;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+
     _fetchData();
   }
 
@@ -45,24 +83,11 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
         url:
             "${links["more"]["url"]}${widget.type}/${widget.id}/similar?api_key=$apiKey",
       );
-      print(
-        "${links["more"]["url"]}${widget.type}/${widget.id}/similar?api_key=$apiKey",
-      );
-      print(
-        "${links["more"]["url"]}${widget.type}/${widget.id}/recommendations?api_key=$apiKey",
-      );
-      // Fetch cast
-      // final castData = await Helper.getData(
-      //   url:
-      //       "${links["details"]["url"]}${widget.type}/${widget.id}/credits?api_key=$apiKey",
-      // );
 
       setState(() {
         _d = detailsData;
         _s = CardItem.transform(similar["results"], widget.type);
         _r = CardItem.transform(recomendation["results"], widget.type);
-
-        // _cast = castData["cast"] ?? [];
       });
     } catch (e) {
       print('Error: $e');
@@ -88,17 +113,13 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           _d["title"] ?? _d["name"] ?? _d["original_name"] ?? "Unknown",
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
       ),
-
-      //       VideoPlayerScreen(
-      //   videoUrl: "https://vidsrc-embed.ru/embed/tv/${widget.id}",
-      // ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,27 +132,26 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage(
-                        "https://image.tmdb.org/t/p/w1280${_d["backdrop_path"]}",
-                      ),
+                      image: NetworkImage("${backDrop}${_d["backdrop_path"]}"),
                       fit: BoxFit.cover,
                     ),
                   ),
-                  padding: EdgeInsets.only(
+                  padding: const EdgeInsets.only(
                     top: 90,
                     left: 50,
                     right: 50,
                     bottom: 30,
                   ),
-                  child: VideoPlayerScreen(
-                    videoUrl:
-                        'https://vidsrc-embed.ru/embed/${widget.type}/${widget.id}',
-                  ),
+                  child: _isPageVisible
+                      ? VideoPlayerScreen(
+                          videoUrl: '${embedLink}/${widget.type}/${widget.id}',
+                        )
+                      : const Center(child: CircularProgressIndicator()),
                 ),
               ),
 
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -148,13 +168,13 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                             borderRadius: BorderRadius.circular(10),
                             image: DecorationImage(
                               image: NetworkImage(
-                                "https://image.tmdb.org/t/p/w500${_d["poster_path"]}",
+                                "${posterLink}${_d["poster_path"]}",
                               ),
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       // Title and Info
                       Expanded(
                         child: Column(
@@ -162,57 +182,186 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                           children: [
                             Text(
                               _d["title"] ?? _d["name"] ?? "Unknown",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 8),
-                            // Tagline
+                            const SizedBox(height: 8),
+
+                            // --- WATCHLIST BUTTON START ---
+                            Row(
+                              children: [
+                                // WATCHLIST BUTTON
+                                Consumer<WatchlistProvider>(
+                                  builder: (context, watchlist, child) {
+                                    bool isInWatchlist = watchlist
+                                        .watchlistItems
+                                        .any(
+                                          (item) =>
+                                              item.id.toString() ==
+                                              widget.id.toString(),
+                                        );
+
+                                    return ElevatedButton.icon(
+                                      onPressed: () {
+                                        final auth = Provider.of<AuthProvider>(
+                                          context,
+                                          listen: false,
+                                        );
+                                        if (auth.userData == null) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Please login first",
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        watchlist.toggleWatchlistRemote(
+                                          CardItem(
+                                            id: widget.id,
+                                            title: _d["title"] ?? _d["name"],
+                                            posterPath:
+                                                "${posterLink}${_d["poster_path"]}",
+                                            rating: _d["vote_average"],
+                                            releaseDate:
+                                                _d["release_date"] ??
+                                                _d["first_air_date"] ??
+                                                "Unknown",
+                                            mediaType: widget.type,
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: isInWatchlist
+                                            ? Colors.grey[850]
+                                            : Colors.red,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                      ),
+                                      icon: Icon(
+                                        isInWatchlist ? Icons.check : Icons.add,
+                                      ),
+                                      label: Text(
+                                        isInWatchlist
+                                            ? "In Watchlist"
+                                            : "Watchlist",
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                // LOVED (HEART) BUTTON
+                                Consumer<LovedProvider>(
+                                  builder: (context, lovedProv, child) {
+                                    bool isLoved = lovedProv.lovedItems.any(
+                                      (item) =>
+                                          item.id.toString() ==
+                                          widget.id.toString(),
+                                    );
+
+                                    return IconButton(
+                                      onPressed: () {
+                                        final auth = Provider.of<AuthProvider>(
+                                          context,
+                                          listen: false,
+                                        );
+                                        if (auth.userData == null) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Please login first",
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        lovedProv.toggleLovedRemote(
+                                          CardItem(
+                                            id: widget.id,
+                                            title: _d["title"] ?? _d["name"],
+                                            posterPath:
+                                                "${posterLink}${_d["poster_path"]}",
+                                            rating: _d["vote_average"],
+                                            releaseDate:
+                                                _d["release_date"] ??
+                                                _d["first_air_date"] ??
+                                                "Unknown",
+                                            mediaType: widget.type,
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(
+                                        isLoved
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        color: isLoved
+                                            ? Colors.red
+                                            : Colors.white,
+                                        size: 28,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            // --- WATCHLIST BUTTON END ---
+                            const SizedBox(height: 8),
                             if (_d["tagline"] != null &&
                                 _d["tagline"].isNotEmpty)
                               Text(
                                 _d["tagline"],
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontStyle: FontStyle.italic,
                                   color: Colors.grey,
                                 ),
                               ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             // Rating
                             Row(
                               children: [
-                                Icon(Icons.star, color: Colors.amber, size: 16),
-                                SizedBox(width: 4),
+                                const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
                                 Text(
                                   "${_d["vote_average"]?.toStringAsFixed(1) ?? "N/A"}",
-                                  style: TextStyle(color: Colors.white),
+                                  style: const TextStyle(color: Colors.white),
                                 ),
-                                SizedBox(width: 16),
+                                const SizedBox(width: 16),
                                 Text(
                                   "${_d["vote_count"]} votes",
-                                  style: TextStyle(color: Colors.grey),
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 8),
-                            // Release Date
+                            const SizedBox(height: 8),
                             Text(
                               "Released: ${_d["release_date"] ?? _d["first_air_date"] ?? "Unknown"}",
-                              style: TextStyle(color: Colors.grey),
+                              style: const TextStyle(color: Colors.grey),
                             ),
-                            // Runtime for movies
                             if (widget.type == "movie" && _d["runtime"] != null)
                               Text(
                                 "Runtime: ${_d["runtime"]} min",
-                                style: TextStyle(color: Colors.grey),
+                                style: const TextStyle(color: Colors.grey),
                               ),
-                            // Seasons/Episodes for TV
                             if (widget.type == "tv")
                               Text(
                                 "Seasons: ${_d["number_of_seasons"]}, Episodes: ${_d["number_of_episodes"]}",
-                                style: TextStyle(color: Colors.grey),
+                                style: const TextStyle(color: Colors.grey),
                               ),
                           ],
                         ),
@@ -220,7 +369,7 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                     ],
                   ),
 
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Genres
                   if (_d["genres"] != null && _d["genres"].isNotEmpty)
@@ -231,23 +380,20 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                             (genre) => Chip(
                               label: Text(
                                 genre["name"],
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                 ),
                               ),
                               backgroundColor: Colors.red,
-                              side: BorderSide(
-                                color: Colors.red,
-                              ), // Grey border
+                              side: const BorderSide(color: Colors.red),
                             ),
                           )
                           .toList(),
                     ),
 
-                  SizedBox(height: 16),
-
-                  Text(
+                  const SizedBox(height: 16),
+                  const Text(
                     "Overview",
                     style: TextStyle(
                       fontSize: 18,
@@ -255,13 +401,13 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     _d["overview"] ?? "No overview available",
-                    style: TextStyle(color: Colors.grey, height: 1.5),
+                    style: const TextStyle(color: Colors.grey, height: 1.5),
                   ),
 
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Production Companies
                   if (_d["production_companies"] != null &&
@@ -269,7 +415,7 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Production",
                           style: TextStyle(
                             fontSize: 18,
@@ -277,7 +423,7 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Wrap(
                           spacing: 8,
                           children:
@@ -286,16 +432,13 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                                     (company) => Chip(
                                       label: Text(
                                         company["name"],
-                                        style: TextStyle(color: Colors.white),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                        ),
                                       ),
                                       backgroundColor: Colors.grey[800],
                                       side: BorderSide(
-                                        color: const Color.fromARGB(
-                                          255,
-                                          66,
-                                          66,
-                                          66,
-                                        ),
+                                        color: Colors.grey[700]!,
                                       ),
                                     ),
                                   )
@@ -303,7 +446,7 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                         ),
                       ],
                     ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   HorizontalSection(
                     title: "Similar",
                     items: _s,
@@ -311,7 +454,7 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
                     kind: "similar",
                     id: widget.id,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   HorizontalSection(
                     title: "Recommendations",
                     items: _r,

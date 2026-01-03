@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // For jsonEncode/decode
 import 'package:http/http.dart' as http;
+import "apiLinks.dart";
 
 class LoginPage extends StatefulWidget {
   // We pass a Map now because there are many pieces of data
-  final Function(Map<String, String> userData, bool isSignUp) onAuthComplete;
+  final Function(
+    Map<String, dynamic> userData,
+    // Map<String, dynamic> configData,
+    bool isSignUp,
+  )
+  onAuthComplete;
 
   const LoginPage({super.key, required this.onAuthComplete});
 
@@ -68,18 +74,26 @@ class _LoginPageState extends State<LoginPage> {
       'lastName': _lastNameController.text.trim(),
     };
     final String url = _isLogin
-        ? 'https://your-domain.com/api/login.php'
-        : 'https://your-domain.com/api/signup.php';
+        ? '${apiLink}/login.php'
+        : '${apiLink}/signup.php';
 
     void _showError(String msg) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
 
     try {
       showDialog(
         context: context,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
+        builder: (context) =>
+            const Center(child: CircularProgressIndicator(color: Colors.red)),
       );
+
       final response = await http.post(
         Uri.parse(url),
         body: {
@@ -96,14 +110,13 @@ class _LoginPageState extends State<LoginPage> {
 
         if (responseData['success'] == true) {
           // 5. Success! Extract the user data from your PHP response
-          Map<String, String> authData = {
+
+          Map<String, dynamic> authData = {
             'userId': responseData['user_id'].toString(),
             'email': email,
             'firstName': responseData['first_name'] ?? firstName,
             'lastName': responseData['last_name'] ?? lastName,
           };
-
-          // 6. Signal the AuthWrapper to switch screens
           widget.onAuthComplete(authData, !_isLogin);
         } else {
           _showError(responseData['message'] ?? "Authentication failed");
