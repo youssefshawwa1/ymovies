@@ -5,7 +5,8 @@ import "apiLinks.dart";
 import "SearchPage.dart";
 
 class MainApp extends StatefulWidget {
-  const MainApp({Key? key}) : super(key: key);
+  final Map<String, dynamic> userData;
+  const MainApp({Key? key, required this.userData}) : super(key: key);
   @override
   _MainAppState createState() => _MainAppState();
 }
