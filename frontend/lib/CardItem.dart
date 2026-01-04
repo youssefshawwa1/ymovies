@@ -26,7 +26,7 @@ class CardItem {
     this.backdropPath,
   });
 
-  String get posterUrl => "${posterLink}{posterPath}";
+  String get posterUrl => "${posterLink}${posterPath}";
 
   // Helper method to display media type
   String get typeDisplayName {

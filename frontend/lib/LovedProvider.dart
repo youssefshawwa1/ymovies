@@ -28,15 +28,28 @@ class LovedProvider with ChangeNotifier {
 
     try {
       final response = await http.get(url);
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         if (responseData['success'] == true) {
           final List<dynamic> data = responseData['data'];
           _lovedIds.clear();
+
+          _lovedItems = data.reversed.map((item) {
+            int id = int.parse(item['id'].toString());
+            _lovedIds.add(id);
+            return CardItem(
+              id: id,
+              title: item["title"],
+              posterPath: item["poster_path"],
+              rating: double.parse(item["vote_average"].toString()),
+              releaseDate: item["release_date"],
+              mediaType: item["media_type"],
+            );
+          }).toList();
         }
       }
     } catch (e) {
-      print("Error fetching loved items: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -62,7 +75,6 @@ class LovedProvider with ChangeNotifier {
     // --- Step B: Background Sync ---
     final url = Uri.parse('$apiLink/toggle_loved.php');
     try {
-      print(item.mediaType);
       final response = await http.post(
         url,
         body: {
@@ -76,12 +88,9 @@ class LovedProvider with ChangeNotifier {
           'vote_average': item.rating?.toString() ?? '0.0',
         },
       );
-      print(response.body);
       final res = json.decode(response.body);
       if (res['success'] != true) throw Exception();
     } catch (e) {
-      print("Sync Error (Loved): $e");
-      // Rollback on failure
       if (wasLoved) {
         _lovedIds.add(id);
         _lovedItems.insert(0, item);

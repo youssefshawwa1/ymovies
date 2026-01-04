@@ -82,20 +82,17 @@ class HorizontalSection extends StatelessWidget {
               final item = items[index] as CardItem;
               return Consumer2<WatchlistProvider, LovedProvider>(
                 builder: (context, watchlist, loved, child) {
-                  // 1. Get status from both providers
                   bool isBookmarked = watchlist.isSaved(item.id);
-                  // Assuming your LovedProvider has a similar method 'isLoved'
                   bool isLoved = loved.isLoved(item.id);
 
                   return ItemCard(
                     item: item,
                     isSaved: isBookmarked,
-                    isLoved: isLoved, // Pass the loved status
+                    isLoved: isLoved,
                     onWatchlistToggle: () {
                       watchlist.toggleWatchlistRemote(item);
                     },
                     onLovedToggle: () {
-                      // 2. Call the loved toggle method
                       loved.toggleLovedRemote(item);
                     },
                     onTap: () {
@@ -146,11 +143,9 @@ class _GridSectionState extends State<GridSection> {
   void initState() {
     super.initState();
     if (widget.items != null) {
-      // 1. Use the passed data
       _d = widget.items!;
       isloading = false;
     } else {
-      // 3. Only fetch if no data was passed
       _fetchData();
     }
   }

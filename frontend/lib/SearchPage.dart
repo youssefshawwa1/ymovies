@@ -8,7 +8,6 @@ class SearchPage extends StatelessWidget {
   final String searchQuery;
 
   const SearchPage({Key? key, required this.searchQuery}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

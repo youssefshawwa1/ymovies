@@ -19,6 +19,16 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  void _showError(String msg, {Color color = Colors.red}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   bool _isLogin = true;
 
   // Controllers for all fields
@@ -34,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     final confirmPass = _confirmPassController.text;
     final firstName = _firstNameController.text;
     final lastName = _lastNameController.text;
-    // Basic Validation
+
     bool _isValidEmail(String email) {
       return RegExp(
         r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
@@ -42,27 +52,35 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("All fields are required!")));
+      _showError("Enter a valid email!", color: Colors.white);
       return;
     }
     if (!_isValidEmail(email)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Enter a valid email!")));
+      _showError("Enter a valid email!", color: Colors.white);
       return;
+    }
+    if (password.length < 8) {
+      _showError(
+        "Password should be at least 8 characters!",
+        color: Colors.white,
+      );
     }
     if (!_isLogin) {
       if (password != confirmPass) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Passwords do not match!")),
+        _showError("Passwords do not match!", color: Colors.white);
+        return;
+      }
+      if (password.length < 8 || confirmPass.length < 8) {
+        _showError(
+          "Password should be at least 8 characters!!",
+          color: Colors.white,
         );
         return;
       }
       if (firstName.isEmpty || lastName.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("All fields are required!!")),
+        _showError(
+          "Password should be at least 8 characters!!",
+          color: Colors.white,
         );
       }
     }
@@ -76,16 +94,6 @@ class _LoginPageState extends State<LoginPage> {
     final String url = _isLogin
         ? '${apiLink}/login.php'
         : '${apiLink}/signup.php';
-
-    void _showError(String msg) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
 
     try {
       showDialog(
@@ -188,11 +196,20 @@ class _LoginPageState extends State<LoginPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onPressed: _submit,
                 child: Text(
                   _isLogin ? "LOGIN" : "SIGN UP",
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
 
@@ -224,6 +241,7 @@ class _LoginPageState extends State<LoginPage> {
       obscureText: isObscure,
       keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
+      cursorColor: Colors.white,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.grey),

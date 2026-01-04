@@ -50,7 +50,6 @@ class _HomeState extends State<Home> {
         isloading = false;
       });
     } catch (e) {
-      print('Error: $e');
       setState(() {
         error = 'Error: $e';
         isloading = false;

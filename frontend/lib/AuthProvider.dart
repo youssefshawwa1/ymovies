@@ -40,7 +40,6 @@ class AuthProvider extends ChangeNotifier {
   Future<void> checkLoadingStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final String? email = prefs.getString('email');
-    print(">>>>>>>>>>>>>>>>>>>>>>>>");
 
     if (email != null) {
       _userData = {

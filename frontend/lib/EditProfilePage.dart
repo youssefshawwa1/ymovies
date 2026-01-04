@@ -85,14 +85,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
           _newPasswordController.clear();
           _confirmPasswordController.clear();
           setState(() => _isChangingPassword = false);
-          _showSuccess("Profile updated successfully!");
+          _showError("Profile updated successfully!", color: Colors.green);
         } else {
           _showError(res['message'] ?? "Update failed");
         }
-        print(response.body);
         if (res['success'] != true) throw Exception();
       } catch (e) {
-        print(e);
         _showError("Connection failed. Please try again.");
       }
     }
@@ -215,21 +213,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  void _showError(String msg) {
+  void _showError(String msg, {Color color = Colors.red}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showSuccess(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: Colors.green,
+        backgroundColor: color,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -247,6 +235,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       controller: controller,
       obscureText: isObscure,
       keyboardType: keyboardType,
+      cursorColor: Colors.red,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,

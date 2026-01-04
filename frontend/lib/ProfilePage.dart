@@ -7,25 +7,19 @@ import "LovedProvider.dart";
 import "EditProfilePage.dart";
 
 class ProfilePage extends StatelessWidget {
-  // 1. Remove the 'userData' requirement from the constructor
   const ProfilePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // 2. "Watch" the AuthProvider for changes
     final authProvider = context.watch<AuthProvider>();
     final userData = authProvider.userData;
-
-    // 3. Handle a potential null case (though usually, they are logged in)
     if (userData == null) {
       return const Center(child: CircularProgressIndicator());
     }
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          // 1. User Header
           const CircleAvatar(
             radius: 50,
             backgroundColor: Colors.redAccent,
@@ -33,7 +27,6 @@ class ProfilePage extends StatelessWidget {
           ),
           const SizedBox(height: 15),
 
-          // Now these text widgets will update instantly!
           Text(
             "${userData['firstName']} ${userData['lastName']}",
             style: const TextStyle(
@@ -73,12 +66,10 @@ class ProfilePage extends StatelessWidget {
                   builder: (context) => Consumer<WatchlistProvider>(
                     builder: (context, watchlist, child) {
                       return GridSection(
-                        // Use a unique key for the watchlist
                         key: const ValueKey('watchlist_grid'),
                         url: "",
                         type: "mix",
                         title: "My Watchlist",
-                        // Pass the live list from the provider
                         items: watchlist.watchlistItems,
                       );
                     },

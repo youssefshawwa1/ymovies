@@ -124,11 +124,7 @@ class _MainAppState extends State<MainApp> {
         elevation: 0,
         title: _isSearching ? _buildSearchBar() : _buildNormalBar(),
       ),
-      body: IndexedStack(
-        // 4. Tip: Use IndexedStack to keep scroll positions when switching tabs
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

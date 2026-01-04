@@ -90,7 +90,6 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> with RouteAware {
         _r = CardItem.transform(recomendation["results"], widget.type);
       });
     } catch (e) {
-      print('Error: $e');
       setState(() {
         error = 'Error: $e';
       });

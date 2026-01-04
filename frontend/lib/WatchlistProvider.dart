@@ -6,8 +6,8 @@ import "apiLinks.dart";
 import "CardItem.dart";
 
 class WatchlistProvider with ChangeNotifier {
-  final Set<int> _savedIds = {}; // For quick icon checks
-  List<CardItem> _watchlistItems = []; // For displaying the list
+  final Set<int> _savedIds = {};
+  List<CardItem> _watchlistItems = [];
   bool _isLoading = false;
   String? _userId;
 
@@ -15,7 +15,6 @@ class WatchlistProvider with ChangeNotifier {
   List<CardItem> get watchlistItems => _watchlistItems;
   bool get isLoading => _isLoading;
 
-  // 1. FETCH: Parses JSON into CardItem objects
   Future<void> fetchWatchlist(dynamic userId) async {
     _userId = userId.toString();
     _isLoading = true;
@@ -49,34 +48,28 @@ class WatchlistProvider with ChangeNotifier {
         }
       }
     } catch (e) {
-      print("Error fetching watchlist: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  // 2. CHECK if saved (still uses the Set for O(1) speed)
   bool isSaved(int id) => _savedIds.contains(id);
 
-  // 3. TOGGLE: Updates both the Set and the List
   Future<void> toggleWatchlistRemote(CardItem item) async {
     if (_userId == null) return;
     final int id = item.id;
     bool wasSaved = _savedIds.contains(id);
 
-    // --- Step A: Optimistic UI Update ---
     if (wasSaved) {
       _savedIds.remove(id);
       _watchlistItems.removeWhere((element) => element.id == id);
       ;
     } else {
       _savedIds.add(id);
-      _watchlistItems.insert(0, item); // Add the full object
+      _watchlistItems.insert(0, item);
     }
     notifyListeners();
-
-    // --- Step B: Background Sync ---
 
     final url = Uri.parse('${apiLink}/toggle_watchlist.php');
 
@@ -93,12 +86,9 @@ class WatchlistProvider with ChangeNotifier {
           'vote_average': item.rating?.toString() ?? '0.0',
         },
       );
-
       final res = json.decode(response.body);
       if (res['success'] != true) throw Exception();
     } catch (e) {
-      print("Sync Error: $e");
-      // Rollback logic
       if (wasSaved) {
         _savedIds.add(id);
         _watchlistItems.add(item);
@@ -106,7 +96,6 @@ class WatchlistProvider with ChangeNotifier {
         _savedIds.remove(id);
         _watchlistItems.removeWhere((element) => element.id == id);
       }
-
       notifyListeners();
     }
   }

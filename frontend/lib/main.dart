@@ -6,20 +6,28 @@ import "LovedProvider.dart";
 import 'AuthWrapper.dart';
 import "global.dart";
 
+import 'dart:io';
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() async {
+  HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
 
   final authProvider = AuthProvider();
-  // Check the disk (SharedPreferences) to see if a user is already saved
   await authProvider.checkLoadingStatus();
 
   runApp(
-    // Change to MultiProvider to support multiple data stores
     MultiProvider(
       providers: [
-        // Pass the already-initialized AuthProvider
         ChangeNotifierProvider.value(value: authProvider),
-
         ChangeNotifierProvider(create: (_) => WatchlistProvider()),
         ChangeNotifierProvider(create: (_) => LovedProvider()),
       ],
@@ -37,6 +45,11 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Colors.white, // The blinking line
+          selectionHandleColor: Colors.red, // THE ICON/TEARDROP YOU MENTIONED
+          selectionColor: Colors.red, // The highlight when text is selected
+        ),
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
         primarySwatch: Colors.red,

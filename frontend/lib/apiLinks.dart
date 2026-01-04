@@ -1,6 +1,6 @@
 import './apiKey/apiKey.dart';
 
-String apiLink = "https://api.somewebsite.store/api/watchlist.php";
+String apiLink = "http://ymovies.atwebpages.com/api";
 String backDrop = "https://image.tmdb.org/t/p/w1280";
 String posterLink = "https://image.tmdb.org/t/p/w500";
 String embedLink = "https://vidsrc-embed.ru/embed";
