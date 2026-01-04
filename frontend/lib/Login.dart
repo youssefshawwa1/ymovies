@@ -3,6 +3,7 @@ import 'dart:convert'; // For jsonEncode/decode
 import 'package:http/http.dart' as http;
 import "apiLinks.dart";
 
+//this is the login widget page, it can be logein or signup.
 class LoginPage extends StatefulWidget {
   // We pass a Map now because there are many pieces of data
   final Function(
@@ -112,10 +113,11 @@ class _LoginPageState extends State<LoginPage> {
           'is_signup': (!_isLogin).toString(),
         },
       );
+
       Navigator.pop(context);
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-
         if (responseData['success'] == true) {
           // 5. Success! Extract the user data from your PHP response
 
@@ -133,6 +135,8 @@ class _LoginPageState extends State<LoginPage> {
         _showError("Server error: ${response.statusCode}");
       }
     } catch (error) {
+      print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      print(error);
       Navigator.pop(context);
       _showError("Connection failed. Check your internet.");
     }

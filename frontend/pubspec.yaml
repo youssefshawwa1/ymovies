@@ -38,8 +38,6 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.2.2
   flutter_launcher_icons: ^0.13.1
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   flutter_native_splash: ^2.4.0
   cupertino_icons: ^1.0.8
 
@@ -47,13 +45,15 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/ymovies.png"
+  adaptive_icon_background: "#1a1a1a"
+  adaptive_icon_foreground: "assets/ymovies.png"
   min_sdk_android: 21
 
 flutter_native_splash:
-  color: "#1a1a1a" # Your background color
-  image: assets/splash_logo.png # Your logo
+  color: "#1a1a1a"
+  image: assets/ymovies.png
   android_12:
-    image: assets/splash_logo.png
+    image: assets/ymovies.png
     color: "#1a1a1a"
 
 dev_dependencies:
@@ -75,6 +75,8 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
+  assets:
+    - assets/ymovies.png
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

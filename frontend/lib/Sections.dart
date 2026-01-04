@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'WatchlistProvider.dart';
 import "LovedProvider.dart";
 
+//the horizantal sections, and the grid section that have pages.
 class HorizontalSection extends StatelessWidget {
   final String title;
   final List<CardItem> items;

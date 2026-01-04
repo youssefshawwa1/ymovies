@@ -1,5 +1,7 @@
 import './apiKey/apiKey.dart';
 
+//this file should be fetched from the backend and be saved using local storage.
+//but now for simplicity, im using this approach.
 String apiLink = "http://ymovies.atwebpages.com/api";
 String backDrop = "https://image.tmdb.org/t/p/w1280";
 String posterLink = "https://image.tmdb.org/t/p/w500";

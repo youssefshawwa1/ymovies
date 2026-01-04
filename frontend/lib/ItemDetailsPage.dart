@@ -143,7 +143,8 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> with RouteAware {
                   ),
                   child: _isPageVisible
                       ? VideoPlayerScreen(
-                          videoUrl: '${embedLink}/${widget.type}/${widget.id}',
+                          videoUrl:
+                              '${embedLink}/${widget.type}/${widget.id}&ds_lang=ar',
                         )
                       : const Center(child: CircularProgressIndicator()),
                 ),

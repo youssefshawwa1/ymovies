@@ -4,6 +4,7 @@ import 'dart:convert';
 import "CardItem.dart";
 import "apiLinks.dart";
 
+//this is the provider for the loved list, and it fetches them from the server first run.
 class LovedProvider with ChangeNotifier {
   final Set<int> _lovedIds = {};
   List<CardItem> _lovedItems = [];

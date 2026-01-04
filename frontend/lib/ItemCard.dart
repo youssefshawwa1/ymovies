@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "CardItem.dart";
 
+//this is the widget Card of any title.
 class ItemCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onWatchlistToggle;

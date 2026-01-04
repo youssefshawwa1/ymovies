@@ -8,6 +8,7 @@ import "global.dart";
 
 import 'dart:io';
 
+//fixing the http problem, certificate ssl issue
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

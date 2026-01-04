@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import "apiLinks.dart";
 
+//this widget, is  the profile edit page
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({Key? key}) : super(key: key);
 
@@ -13,8 +14,10 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  //defining the form key
   final _formKey = GlobalKey<FormState>();
 
+  //defining the text field controllers
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _emailController;
@@ -25,9 +28,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   bool _isChangingPassword = false;
 
   @override
+  //initiaal staate, make sure to get the current user profile data, from the provider.
   void initState() {
     super.initState();
-    // Getting data from Provider using bracket notation to avoid errors
     final userData = context.read<AuthProvider>().userData;
 
     _firstNameController = TextEditingController(
@@ -44,6 +47,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   @override
+  //after the widget goes, it should delete the text fields controller, for securitty.
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
@@ -55,11 +59,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _handleSave() async {
+    //handling the save button.
+
+    //if the form is validated then go on.
     if (_formKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
 
-      // 2. Extract the userId (depends on if your userData is a Map or a Model)
-      // If it's a Map:
       String userId = authProvider.userData?["userId"] ?? "";
 
       final updateData = {
@@ -71,6 +76,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         if (_isChangingPassword) "new_password": _newPasswordController.text,
       };
       final url = Uri.parse('$apiLink/update_user.php');
+
+      //sending the data to the api
       try {
         final response = await http.post(url, body: updateData);
         final res = json.decode(response.body);
@@ -223,6 +230,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  //build styled field, based on its type, and validate baased on its type.
   Widget _buildStyledField(
     TextEditingController controller,
     String label, {
@@ -248,6 +256,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         errorStyle: const TextStyle(color: Colors.redAccent),
       ),
+
+      //validatoin of the textfields.
       validator: (value) {
         if (value == null || value.isEmpty) {
           // Current password and profile info are required

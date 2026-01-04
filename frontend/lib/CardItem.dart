@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "apiLinks.dart";
 
+//this model is for the card, it can be a tv or movie.
 class CardItem {
   final int id;
   final String title;
@@ -59,6 +60,7 @@ class CardItem {
     }
   }
 
+  //this static method, transforms the data from the api, and returns a list of CardItem.
   static List<CardItem> transform(data, type) {
     List<CardItem> items = [];
     for (var jsonItem in data) {

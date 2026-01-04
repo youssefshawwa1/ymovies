@@ -4,6 +4,7 @@ import './Helper.dart';
 import 'apiLinks.dart';
 import './Sections.dart';
 
+//this is the search page
 class SearchPage extends StatelessWidget {
   final String searchQuery;
 
