@@ -13,7 +13,7 @@ class AuthWrapper extends StatelessWidget {
     final auth = Provider.of<AuthProvider>(context);
 
     if (auth.isLoggedIn) {
-      // 1. Pass the whole map to MainApp so it can use ID, names, etc.
+      // Pass the whole map to MainApp so it can use ID, names, etc.
       return MainApp(userData: auth.userData!);
     } else {
       return LoginPage(

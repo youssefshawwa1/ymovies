@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "apiLinks.dart";
 
 class CardItem {
   final int id;
@@ -25,7 +26,7 @@ class CardItem {
     this.backdropPath,
   });
 
-  String get posterUrl => "https://image.tmdb.org/t/p/w500${posterPath}";
+  String get posterUrl => "${posterLink}{posterPath}";
 
   // Helper method to display media type
   String get typeDisplayName {

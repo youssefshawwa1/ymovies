@@ -6,7 +6,7 @@ import "apiLinks.dart";
 class LoginPage extends StatefulWidget {
   // We pass a Map now because there are many pieces of data
   final Function(
-    Map<String, dynamic> userData,
+    Map<String, String> userData,
     // Map<String, dynamic> configData,
     bool isSignUp,
   )
@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
         if (responseData['success'] == true) {
           // 5. Success! Extract the user data from your PHP response
 
-          Map<String, dynamic> authData = {
+          Map<String, String> authData = {
             'userId': responseData['user_id'].toString(),
             'email': email,
             'firstName': responseData['first_name'] ?? firstName,
